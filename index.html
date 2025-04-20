@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Phân Tích MD5 - vkhanhh v2 (Quy tắc giả định)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 550px; /* Slightly wider */
+            background: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid #dddfe2;
+        }
+        h1 {
+            text-align: center;
+            color: #1877f2; /* Facebook blue */
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #dc3545; /* Red warning */
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+        .toggle-button {
+            display: block;
+            width: 100%;
+            background-color: #e4e6eb;
+            color: #050505;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            transition: background-color 0.2s;
+        }
+        .toggle-button:hover {
+            background-color: #dcdfe4;
+        }
+        .analysis-section {
+            display: none; /* Initially hidden */
+            margin-top: 15px;
+            padding-top: 20px;
+            border-top: 1px solid #dddfe2;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #606770;
+        }
+        input[type="text"] {
+            width: calc(100% - 24px); /* Account for padding */
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccd0d5;
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: #f5f6f7;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #1877f2;
+            box-shadow: 0 0 0 2px #e7f3ff;
+        }
+        .analyze-button {
+            display: block;
+            width: 100%;
+            background-color: #1877f2; /* Facebook blue */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .analyze-button:hover {
+            background-color: #166fe5;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f7f8fa;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            display: none; /* Hide initially */
+            white-space: pre-wrap; /* Preserve line breaks and spaces */
+            word-wrap: break-word; /* Break long words/hashes */
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .result-title {
+            font-weight: bold;
+            color: #050505;
+            margin-bottom: 10px;
+            display: block;
+        }
+         .result-highlight {
+            font-weight: bold;
+            background-color: #f0f2f5;
+            padding: 1px 4px;
+            border-radius: 3px;
+         }
+        .probability-tai {
+            color: #fa383e; /* Red for Tài */
+            font-weight: bold;
+            font-size: 1.2em; /* Larger font size */
+            padding: 5px 8px;
+            background-color: #ffebe B;
+            border-radius: 4px;
+            display: inline-block; /* Allow background */
+        }
+        .probability-xiu {
+            color: #1877f2; /* Blue for Xỉu */
+            font-weight: bold;
+            font-size: 1.2em; /* Larger font size */
+            padding: 5px 8px;
+            background-color: #e7f3ff;
+            border-radius: 4px;
+            display: inline-block; /* Allow background */
+        }
+        .error {
+            color: #fa383e;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #ffebe M;
+            border: 1px solid #fa383e;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+         .disclaimer {
+            margin-top: 20px;
+            font-style: italic;
+            color: #606770;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 10px;
+            border: 1px dashed #ffc107; /* Yellow dashed border */
+            background-color: #fff3cd; /* Light yellow background */
+            border-radius: 5px;
+         }
+         .disclaimer strong {
+             color: #dc3545; /* Red */
+         }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Tool Phân Tích MD5 - vkhanhh v2</h1>
+    <p class="subtitle">⚠️ Dựa trên Quy Tắc Phổ Biến (Ký Tự Cuối) - Độ chính xác KHÔNG ĐẢM BẢO! ⚠️</p>
+
+    <button id="toggleMd5Button" class="toggle-button">Hiện khu vực nhập Mã MD5</button>
+
+    <div id="md5AnalysisSection" class="analysis-section">
+        <label for="md5Input">Sao chép mã MD5 từ cổng game vào đây:</label>
+        <input type="text" id="md5Input" placeholder="Dán mã MD5 (32 ký tự) cần phân tích...">
+        <button id="analyzeMd5Button" class="analyze-button">Phân Tích</button>
+        <div id="md5Result" class="result"></div>
+         <p class="disclaimer">
+            <strong>⚠️ CẢNH BÁO QUAN TRỌNG:</strong> Tool này phân tích dựa trên giả định rằng cổng game dùng quy tắc phổ biến nhất (ký tự cuối của mã MD5). <strong>Quy tắc thực tế của <span style="font-weight:bold; color: #000;">play.xocdia88.monster</span> hoặc bất kỳ game nào khác có thể HOÀN TOÀN KHÁC.</strong> Kết quả này chỉ mang tính chất tham khảo, học hỏi. <strong>TUYỆT ĐỐI KHÔNG sử dụng làm cơ sở duy nhất để đưa ra quyết định tài chính. Rủi ro rất cao!</strong> Hãy tự kiểm chứng bằng cách theo dõi nhiều phiên.
+        </p>
+    </div>
+
+</div>
+
+<script>
+    // --- Elements ---
+    const toggleMd5Button = document.getElementById('toggleMd5Button');
+    const md5AnalysisSection = document.getElementById('md5AnalysisSection');
+    const md5Input = document.getElementById('md5Input');
+    const analyzeMd5Button = document.getElementById('analyzeMd5Button');
+    const md5Result = document.getElementById('md5Result');
+
+    // --- Event Listeners ---
+    toggleMd5Button.addEventListener('click', () => {
+        const isHidden = md5AnalysisSection.style.display === 'none' || md5AnalysisSection.style.display === '';
+        if (isHidden) {
+            md5AnalysisSection.style.display = 'block';
+            toggleMd5Button.textContent = 'Ẩn khu vực nhập Mã MD5';
+            md5Input.focus();
+        } else {
+            md5AnalysisSection.style.display = 'none';
+            toggleMd5Button.textContent = 'Hiện khu vực nhập Mã MD5';
+            md5Result.style.display = 'none';
+            md5Input.value = '';
+            md5Result.innerHTML = '';
+        }
+    });
+
+    analyzeMd5Button.addEventListener('click', () => {
+        const md5Value = md5Input.value.trim().toLowerCase();
+        md5Result.innerHTML = '';
+        md5Result.style.display = 'block';
+
+        // 1. Validate Input
+        if (md5Value.length !== 32 || !/^[a-f0-9]{32}$/.test(md5Value)) {
+            md5Result.innerHTML = '<p class="error">Lỗi: Mã MD5 không hợp lệ. Vui lòng nhập đúng 32 ký tự bao gồm số (0-9) và chữ (a-f).</p>';
+            return;
+        }
+
+        // 2. Extract Last Character
+        const lastChar = md5Value.slice(-1);
+
+        // 3. Determine Prediction based on the *ASSUMED COMMON* rule
+        let prediction = '';
+        let predictionClass = '';
+        let ruleExplanation = '';
+        let certaintyStatement = "Nếu cổng game sử dụng quy tắc này, kết quả dự đoán là:"; // Emphasize conditional nature
+
+        if (/\d/.test(lastChar)) { // Check if it's a digit (0-9)
+            prediction = 'XỈU';
+            predictionClass = 'probability-xiu';
+            ruleExplanation = `Ký tự cuối là <span class="result-highlight">${lastChar}</span> (SỐ). Theo quy tắc phổ biến được giả định, điều này thường tương ứng với <span class="${predictionClass}">XỈU</span>.`;
+        } else if (/[a-f]/.test(lastChar)) { // Check if it's a letter (a-f)
+            prediction = 'TÀI';
+            predictionClass = 'probability-tai';
+            ruleExplanation = `Ký tự cuối là <span class="result-highlight">${lastChar}</span> (CHỮ). Theo quy tắc phổ biến được giả định, điều này thường tương ứng với <span class="${predictionClass}">TÀI</span>.`;
+        } else {
+            md5Result.innerHTML = '<p class="error">Lỗi: Không thể xác định ký tự cuối hợp lệ.</p>';
+            return;
+        }
+
+        // 4. Build Detailed Output - AVOID MISLEADING "PROBABILITY"
+        let outputHTML = `
+            <span class="result-title">Kết Quả Phân Tích (Dựa trên Giả Định)</span>
+            <p><strong>Mã MD5 đã nhập:</strong><br><span style="font-family: monospace;">${md5Value}</span></p>
+            <p><strong>Quy tắc GIẢ ĐỊNH được áp dụng:</strong> Xét ký tự cuối cùng của mã MD5 (Số = Xỉu, Chữ = Tài).</p>
+            <p><strong>Phân tích chi tiết:</strong><br>${ruleExplanation}</p>
+            <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
+            <p><strong>${certaintyStatement}</strong> <span class="${predictionClass}">${prediction}</span></p>
+            <p style="margin-top:10px; font-size:0.9em; color: #606770;"><i>(Lưu ý: Đây là dự đoán dựa trên giả định. Độ chính xác phụ thuộc hoàn toàn vào việc cổng game có sử dụng đúng quy tắc này hay không.)</i></p>
+        `;
+
+        md5Result.innerHTML = outputHTML;
+    });
+
+    md5Input.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            analyzeMd5Button.click();
+        }
+    });
+
+</script>
+
+</body>
+</html>
